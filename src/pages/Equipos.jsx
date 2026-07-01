@@ -1,33 +1,61 @@
 import { createClient } from "@supabase/supabase-js";
-import { useEffect } from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
 const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
 
 export default function Equipos() {
 
-  const [instruments, setInstruments] = useState([]);
+  const [equipos, setEquipos] = useState([])
 
   useEffect(() => {
-    getInstruments();
-  }, []);
+    //Apenas se construye mi componente
+    getEquipos()
+  }, [])
 
-  async function getInstruments() {
-    const { data, error } = await supabase.from("equipos").select('*');
+  //Es un estandar que hace referencia a OBTENER
+  async function getEquipos() {
+    //Select * from equipos
+    const { data, error } = await supabase.from('equipos').select('*')
+
     if (error) {
-      console.error(error);
-      return;
+      console.error(error)
+      return
     }
-    setInstruments(data);
-    console.log(data)
+
+    console.log(data);
+    setEquipos(data);
   }
 
 
   return (
     <div className="flex items-center justify-center h-[calc(100vh-12rem)]">
       <div className="text-center">
-        <span className="material-symbols-outlined text-6xl text-outline mb-4">groups</span>
-        <h2 className="text-headline-md text-primary mb-2">Equipos</h2>
-        <p className="text-body-md text-on-surface-variant">Gestión de selecciones participantes</p>
+        <table>
+          <tr>
+            <th>Nombre</th>
+            <th>Grupo</th>
+            <th>Ranking</th>
+            <th>Opciones</th>
+          </tr>
+          {
+            equipos.map(equipo => (
+
+              <tr>
+                <td>{equipo.nombre}</td>
+                <td>{equipo.grupo}</td>
+                <td>{equipo.ranking_fifa}</td>
+                <td>
+                  <button>Editar</button>
+                  <button>Eliminar</button>
+                </td>
+              </tr>
+
+            ))
+          }
+          
+
+        </table>
+
       </div>
     </div>
   )

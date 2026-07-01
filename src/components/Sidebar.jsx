@@ -12,7 +12,7 @@ export default function Sidebar() {
             </span>
           </div>
           <h1 className="text-headline-md font-bold text-primary">
-            FIFA World Cup
+            FIFA Mundial 2026
           </h1>
         </div>
         <p className="text-caption text-on-surface-variant ml-13">
