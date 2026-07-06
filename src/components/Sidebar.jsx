@@ -20,7 +20,8 @@ export default function Sidebar() {
         </p>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-4 flex flex-col gap-1">
+      {/* Eliminamos el flex-1 de aquí para que el nav ocupe solo su espacio y deje que el logo suba */}
+      <nav className="overflow-y-auto px-4 flex flex-col gap-1">
         {navLinks.map((link) => (
           <Link
             key={link.to}
@@ -32,6 +33,15 @@ export default function Sidebar() {
           </Link>
         ))}
       </nav>
+
+      {/* 🏆 LOGO CORREGIDO: Más arriba (debajo del menú) y más grande (max-w-[160px]) */}
+      <div className="flex-1 flex items-start justify-center px-4 pt-8 opacity-95 hover:opacity-100 transition-opacity">
+        <img 
+          src="/logo2mundial.jpg" 
+          alt="Logo FIFA 2026" 
+          className="w-full max-w-[160px] h-auto object-contain select-none pointer-events-none drop-shadow-[0_4px_10px_rgba(0,0,0,0.06)]"
+        />
+      </div>
 
       <div className="px-4 mt-auto pt-4 border-t border-outline-variant">
         <a
