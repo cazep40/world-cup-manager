@@ -12,38 +12,59 @@ export default function Goleadores() {
 
   async function procesarTablaGoleadores() {
     setLoading(true)
-    const [jugadoresRes, golesRes, partidosRes, equiposRes] = await Promise.all([
-      supabase.from("jugadores").select("id, nombre, equipo_id, foto_url"),
+    
+    // 1. Primero traemos los goles y partidos disputados
+    const [golesRes, partidosRes, equiposRes] = await Promise.all([
       supabase.from("goles").select("*"),
       supabase.from("partidos").select("id, local_id, visitante_id"),
       supabase.from("equipos").select("id, nombre")
     ])
 
-    if (jugadoresRes.error || golesRes.error || partidosRes.error || equiposRes.error) {
+    if (golesRes.error || partidosRes.error || equiposRes.error) {
       console.error("Error al recopilar datos estadísticos.")
       setLoading(false)
       return
     }
 
-    const listaJugadores = jugadoresRes.data || []
     const listaGoles = golesRes.data || []
     const listaPartidos = partidosRes.data || []
     setEquipos(equiposRes.data || [])
 
-    // 🔥 MAPEO Y FILTRADO DE AUTOGOLES EN TIEMPO REAL
-    const conteoGoles = listaJugadores.map(jugador => {
-      // Filtrar solo los goles reales de este jugador
-      const golesValidos = listaGoles.filter(gol => {
-        if (gol.jugador_id !== jugador.id) return false
+    // 2. Extraemos las IDs únicas de todos los jugadores que han metido goles
+    const idsAnotadores = [...new Set(listaGoles.map(g => Number(g.jugador_id)))]
 
-        // Buscar el partido para verificar si fue autogol
-        const partido = listaPartidos.find(p => p.id === gol.partido_id)
+    if (idsAnotadores.length === 0) {
+      setGoleadores([])
+      setLoading(false)
+      return
+    }
+
+    // 3. 🎯 Traemos de Supabase SOLO a los jugadores que están en esa lista de anotadores
+    // Esto rompe el límite de 1000 registros porque la consulta va directo al grano
+    const { data: listaJugadores, error: jugadoresError } = await supabase
+      .from("jugadores")
+      .select("id, nombre, equipo_id, foto_url")
+      .in("id", idsAnotadores)
+
+    if (jugadoresError) {
+      console.error("Error al traer los jugadores anotadores:", jugadoresError)
+      setLoading(false)
+      return
+    }
+
+    // 4. Mapeamos y calculamos los goles válidos (evitando autogoles)
+    const conteoGoles = listaJugadores.map(jugador => {
+      const golesValidos = listaGoles.filter(gol => {
+        if (Number(gol.jugador_id) !== Number(jugador.id)) return false
+
+        const partido = listaPartidos.find(p => Number(p.id) === Number(gol.partido_id))
         if (!partido) return false
 
-        // Si el jugador pertenece al equipo local o visitante, asumimos gol válido.
-        // Un autogol estricto ocurre si mete gol pero no es de ninguno de los bandos activos,
-        // o según la lógica de asignación que gestionamos en el modal.
-        return jugador.equipo_id === partido.local_id || jugador.equipo_id === partido.visitante_id
+        const idJugadorEquipo = Number(jugador.equipo_id)
+        const idPartidoLocal = Number(partido.local_id)
+        const idPartidoVisitante = Number(partido.visitante_id)
+
+        return idJugadorEquipo === idPartidoLocal || idJugadorEquipo === idPartidoVisitante
       })
 
       return {
@@ -52,7 +73,7 @@ export default function Goleadores() {
         golesPenal: golesValidos.filter(g => g.es_penal).length
       }
     })
-    // Filtrar únicamente a los que hayan metido al menos 1 gol y ordenar de mayor a menor
+    // Mostramos solo los que tengan goles reales y ordenamos de mayor a menor
     .filter(j => j.totalGoles > 0)
     .sort((a, b) => b.totalGoles - a.totalGoles || a.nombre.localeCompare(b.nombre))
 
@@ -60,8 +81,9 @@ export default function Goleadores() {
     setLoading(false)
   }
 
+  // ✅ CORREGIDO: Casteo numérico para evitar el "SIN EQUIPO"
   function obtenerNombreEquipo(id) {
-    const eq = equipos.find(e => e.id === id)
+    const eq = equipos.find(e => Number(e.id) === Number(id))
     return eq ? eq.nombre : "SIN EQUIPO"
   }
 
@@ -107,7 +129,7 @@ export default function Goleadores() {
                 </span>
               </div>
 
-              {/* Info Jugador con su Foto del Storage */}
+              {/* Info Jugador */}
               <div className="col-span-5 flex items-center gap-3">
                 <img
                   src={jugador.foto_url || "https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg"}

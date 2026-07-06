@@ -1,8 +1,10 @@
 export const navLinks = [
-  { to: '/', icon: 'dashboard', label: 'Dashboard' },
-  { to: '/equipos', icon: 'groups', label: 'Equipos' },
-  { to: '/jugadores', icon: 'person', label: 'Jugadores' },
-  { to: '/partidos', icon: 'sports_soccer', label: 'Partidos' },
-  { to: '/posiciones', icon: 'leaderboard', label: 'Posiciones' },
-  { to: '/goleadores', icon: 'emoji_events', label: 'Goleadores' },
+  { to: '/', label: 'Dashboard', icon: 'dashboard' },
+  { to: '/equipos', label: 'Equipos', icon: 'shield' },
+  { to: '/jugadores', label: 'Jugadores', icon: 'person_search' },
+  { to: '/partidos', label: 'Partidos', icon: 'sports_soccer' },
+  { to: '/posiciones', label: 'Posiciones', icon: 'leaderboard' },
+  { to: '/goleadores', label: 'Goleadores', icon: 'emoji_events' },
+  // 🏆 AGREGAMOS LA NUEVA OPCIÓN DEL FIXTURE AQUÍ:
+  { to: '/fixture', label: 'Fixture', icon: 'account_tree' }
 ]

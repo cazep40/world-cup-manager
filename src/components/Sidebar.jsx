@@ -20,7 +20,6 @@ export default function Sidebar() {
         </p>
       </div>
 
-      {/* Eliminamos el flex-1 de aquí para que el nav ocupe solo su espacio y deje que el logo suba */}
       <nav className="overflow-y-auto px-4 flex flex-col gap-1">
         {navLinks.map((link) => (
           <Link
@@ -34,7 +33,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* 🏆 LOGO CORREGIDO: Más arriba (debajo del menú) y más grande (max-w-[160px]) */}
+      {/* 🏆 LOGO DEL MUNDIAL DEBAJO DEL MENÚ */}
       <div className="flex-1 flex items-start justify-center px-4 pt-8 opacity-95 hover:opacity-100 transition-opacity">
         <img 
           src="/logo2mundial.jpg" 
